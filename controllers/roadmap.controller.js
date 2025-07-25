@@ -83,6 +83,22 @@ const toggleSaveRoadmap = asyncHandler(async (req, res) => {
   );
 });
 
+const getRoadmapsByCareerPath = asyncHandler(async (req, res) => {
+  const { careerId } = req.params;
+
+  const roadmaps = await Roadmap.find({ careerPath: careerId });
+
+  if (!roadmaps || roadmaps.length === 0) {
+    throw new ApiError(404, "No roadmaps found for the given career path");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, roadmaps, "Roadmaps for career path fetched"));
+});
+
+
+
 module.exports = {
   getAllRoadmaps,
   getSingleRoadmap,
@@ -90,4 +106,5 @@ module.exports = {
   updateRoadmap,
   deleteRoadmap,
   toggleSaveRoadmap,
+  getRoadmapsByCareerPath,
 };

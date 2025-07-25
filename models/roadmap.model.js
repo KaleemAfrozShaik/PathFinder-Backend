@@ -25,10 +25,7 @@ const roadmapSchema = new mongoose.Schema({
 
   steps: [stepSchema], // Array of learning steps
 
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Likely a mentor or admin
-  }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("Roadmap", roadmapSchema);

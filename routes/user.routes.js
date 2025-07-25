@@ -29,8 +29,8 @@ router.put("/update-profile",  upload.single("profilePicture"),verifyJWT,updateP
 router.put("/change-password", verifyJWT, changeCurrentPassword);
 router.get("/saved-paths", verifyJWT, getSavedPaths);
 router.put("/update-role", verifyJWT, updateRole);
-
 router.get("/mentors", verifyJWT,getAllMentors);
+
 router.get("/mentor/:mentorId", getMentorById);
 
 module.exports = router;

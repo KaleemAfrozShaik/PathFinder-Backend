@@ -269,6 +269,26 @@ const getMentorById = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, mentor, "Mentor fetched successfully"));
 });
 
+const toggleSavedRoadmap = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { roadmapId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const alreadySaved = user.savedRoadmaps.includes(roadmapId);
+
+    if (alreadySaved) {
+        user.savedRoadmaps.pull(roadmapId);
+        await user.save();
+        return res.json({ saved: false, message: "Roadmap unsaved" });
+    } else {
+        user.savedRoadmaps.push(roadmapId);
+        await user.save();
+        return res.json({ saved: true, message: "Roadmap saved" });
+    }
+});
+
 module.exports = {
     registerUser,
     loginUser, 
@@ -280,5 +300,6 @@ module.exports = {
     getCurrentUser,
     updateRole,
     getAllMentors,
-    getMentorById
+    getMentorById,
+    toggleSavedRoadmap,
 };
