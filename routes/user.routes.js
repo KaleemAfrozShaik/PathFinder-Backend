@@ -11,6 +11,7 @@ const {
   updateRole,
   getAllMentors,
   getMentorById,
+  
 } = require("../controllers/user.controller");
 
 const { verifyJWT } = require("../middlewares/auth.middleware");

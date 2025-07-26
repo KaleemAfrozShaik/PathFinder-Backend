@@ -1,7 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const multer = require("multer");
+const passport = require('passport');
+const { googleLogin } = require('./controllers/user.controller');
 require('dotenv').config(); 
+require('./googleAuth'); 
 
 const app = express();
 
@@ -19,9 +23,19 @@ const userRoutes = require("./routes/user.routes");
 const roadmapRoutes = require("./routes/roadmap.routes");
 
 
+app.use(passport.initialize());
 // Use routes
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/roadmaps", roadmapRoutes);     
+app.use("/api/v1/roadmaps", roadmapRoutes); 
+
+// Initialize passport for authentication
+app.get("/api/v1/auth/google", passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get(
+  "/api/v1/auth/google/callback",
+  passport.authenticate("google", { session: false, failureRedirect: "/login" }),
+  googleLogin
+);
 
 
 

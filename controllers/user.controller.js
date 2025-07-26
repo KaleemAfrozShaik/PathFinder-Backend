@@ -21,54 +21,50 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-    console.log("📥 registerUser controller reached");
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
-  const { name, email, password, role, bio } = req.body;
+    const { name, email, password, role, bio } = req.body;
 
-  if (!name?.trim() || !email?.trim() || !password?.trim()) {
-    throw new ApiError(400, "Name, Email, and Password are required");
-  }
-
-  const existedUser = await User.findOne({ email });
-  if (existedUser) {
-    throw new ApiError(409, "User with this email already exists");
-  }
-
-  // Handle profile picture upload (if provided)
-  let profileUrl = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // default
-const profilePicturePath = req.file?.path;
-
-if (profilePicturePath) {
-  try {
-    console.log("🟡 Uploading to Cloudinary:", profilePicturePath);
-    const uploaded = await uploadOnCloudinary(profilePicturePath);
-    console.log("✅ Cloudinary Upload Result:", uploaded);
-
-    if (!uploaded?.url) {
-      throw new ApiError(400, "Failed to upload profile picture");
+    if (!name?.trim() || !email?.trim() || !password?.trim()) {
+        throw new ApiError(400, "Name, Email, and Password are required");
     }
-    profileUrl = uploaded.url;
-  } catch (err) {
-    console.error("❌ Cloudinary Upload Error:", err);
-    throw new ApiError(500, "Cloudinary upload failed");
-  }
-}
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-    role,
-    bio,
-    profilePicture: profileUrl,
-  });
+    const existedUser = await User.findOne({ email });
+    if (existedUser) {
+        throw new ApiError(409, "User with this email already exists");
+    }
 
-  const createdUser = await User.findById(user._id).select("-password -refreshToken");
+    let profileUrl = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // default
+    const profilePicturePath = req.file?.path;
 
-  return res.status(201).json(
-    new ApiResponse(201, createdUser, "User registered successfully")
-  );
+    if (profilePicturePath) {
+    try {
+        console.log("🟡 Uploading to Cloudinary:", profilePicturePath);
+        const uploaded = await uploadOnCloudinary(profilePicturePath);
+        console.log("✅ Cloudinary Upload Result:", uploaded);
+
+        if (!uploaded?.url) {
+        throw new ApiError(400, "Failed to upload profile picture");
+        }
+        profileUrl = uploaded.url;
+    } catch (err) {
+        console.error("❌ Cloudinary Upload Error:", err);
+        throw new ApiError(500, "Cloudinary upload failed");
+    }
+    }
+
+    const user = await User.create({
+        name,
+        email,
+        password,
+        role,
+        bio,
+        profilePicture: profileUrl,
+    });
+
+    const createdUser = await User.findById(user._id).select("-password -refreshToken");
+
+    return res.status(201).json(
+        new ApiResponse(201, createdUser, "User registered successfully")
+    );
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -289,6 +285,28 @@ const toggleSavedRoadmap = asyncHandler(async (req, res) => {
     }
 });
 
+const googleLogin = asyncHandler(async (req, res, next) => {
+    const { user } = req;
+    if (!user) {
+        throw new ApiError(401, "Google authentication failed");
+    }
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'lax', 
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    };
+
+
+    res
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, { ...options, maxAge: 30 * 24 * 60 * 60 * 1000 })
+        .redirect('http://localhost:5173/login?google=true'); 
+});
+
 module.exports = {
     registerUser,
     loginUser, 
@@ -302,4 +320,5 @@ module.exports = {
     getAllMentors,
     getMentorById,
     toggleSavedRoadmap,
+    googleLogin
 };
