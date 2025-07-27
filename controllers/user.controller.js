@@ -307,7 +307,7 @@ const googleLogin = asyncHandler(async (req, res, next) => {
     res
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, { ...options, maxAge: 30 * 24 * 60 * 60 * 1000 })
-        .redirect('https://path-finder-n4ahkrdrq-kaleem-afroz-shaiks-projects.vercel.app/login?google=true'); 
+        .redirect('https://path-finder-swart.vercel.app/login?google=true'); 
 });
 
 module.exports = {
