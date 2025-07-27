@@ -91,6 +91,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: true,
+        sameSite:"None"
     };
 
     return res
@@ -116,6 +117,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: true,
+        sameSite: "None"
     };
     if(!req.user) {
         return res.status(401).json(new ApiResponse(401, {}, "Unauthorized request"));
@@ -161,6 +163,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const options = {
     httpOnly: true,
     secure: true,
+    sameSite: "None"
     };
 
     return res
@@ -296,7 +299,7 @@ const googleLogin = asyncHandler(async (req, res, next) => {
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', 
-        sameSite: 'lax', 
+        sameSite: "None",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     };
 
